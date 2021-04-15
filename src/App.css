@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&family=Zen+Dots&display=swap');
+
+.App {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+}
+
+.header {
+  background-color: #031934;
+  display: flex;
+  justify-content: center;
+}
+
+.header div {
+  background-color: #143b5c;
+  display: flex;
+  align-items: center;
+  padding: 10px 30px;
+  margin: 0 15px;
+  font-family: 'Zen Dots', cursive;
+  color: #fff;
+}
+
+.header div img {
+  max-height: 50px;
+  margin-right: 10px;
+}
+
+.content {
+  background: url("./images/background.jpg") center 0 no-repeat;
+  background-size: auto;
+  flex-basis: 95%;
+}
