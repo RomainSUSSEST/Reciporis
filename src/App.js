@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
 
 import Cards from './components/Cards';
 import Equipments from './components/Equipments';
 import Chinq from './components/Chinq';
 
-import cardIcon from './images/card-icon.svg';
+import cardIcon from './images/card-icon.png';
 import equipmentsIcon from './images/equipments-icon.png';
 import chinqIcon from './images/chinq-icon.png';
 
@@ -21,8 +21,6 @@ class App extends React.Component {
     this.setState({
       showComponent: e.currentTarget.getAttribute("data-component")
     })
-
-    console.log(this.state.showComponent)
   }
 
   render() {
@@ -53,7 +51,7 @@ class App extends React.Component {
         </div>
           <div onClick={this.changeComponent.bind(this)} data-component="Equipments">
             <img src={equipmentsIcon} alt="" />
-          Équipements
+          Un peu de tout
         </div>
           <div onClick={this.changeComponent.bind(this)} data-component="Chinq">
             <img src={chinqIcon} alt="" />

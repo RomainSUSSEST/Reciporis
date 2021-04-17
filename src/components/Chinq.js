@@ -1,8 +1,12 @@
 import React from 'react';
+import Cards from './Cards';
+
 
 class Chinq extends React.Component {
     render() {
-        return <h1>Bonjour, ici chinq</h1>;
+        return (
+            <Cards />
+            );
     }
 }
 
