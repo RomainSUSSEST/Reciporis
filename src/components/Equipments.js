@@ -119,7 +119,7 @@ class Equipments extends React.Component {
                         this.state.PARSED_CARDS[this.state.paginationIndex].map((cards) => {
                             return (
                                 <div className="card-details" key={cards.id}>
-                                    <div className="card-image"><img src={require("../images/items/40/" + cards.id + ".png")["default"]} alt={cards.name} /></div>
+                                    <div className="card-image"><img src={require("../images/items/" + cards.id + ".png")["default"]} alt={cards.name} /></div>
                                     <div className="card-content">
                                         <div className="card-name">{cards.name}</div>
                                         <div className="card-level">Level {cards.level}</div>
@@ -133,7 +133,7 @@ class Equipments extends React.Component {
                         this.state.searchedResults.map((cards) => {
                             return (
                                 <div className="card-details" key={cards.id}>
-                                    <div className="card-image"><img src={require("../images/items/40/" + cards.id + ".png")["default"]} alt={cards.name} /></div>
+                                    <div className="card-image"><img src={require("../images/items/" + cards.id + ".png")["default"]} alt={cards.name} /></div>
                                     <div className="card-content">
                                         <div className="card-name">{cards.name}</div>
                                         <div className="card-level">Level {cards.level}</div>

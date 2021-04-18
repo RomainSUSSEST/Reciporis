@@ -16,9 +16,11 @@ class Chinq extends React.Component {
             PARSED_EQUIPMENTS: [],
             cards_json: JSON.parse(this.props.cards_json),
             equipments_json: JSON.parse(this.props.equipments_json),
+            recipe_equipment_related: null,
             recipe: [null, null, null, null, null],
             active_card: -1,
-            recipesDB: this.props.recipes_json
+            recipesDB: this.props.recipes_json,
+            context: 0
         };
         this.changePage = this.changePage.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -28,6 +30,7 @@ class Chinq extends React.Component {
         this.modifyRecipe = this.modifyRecipe.bind(this);
         this.resetCards = this.resetCards.bind(this);
         this.createRecipe = this.createRecipe.bind(this);
+        this.assignRecipe = this.assignRecipe.bind(this);
     }
 
     componentDidMount() {
@@ -43,21 +46,23 @@ class Chinq extends React.Component {
             x = x.concat(y[i]);
         }
 
-        const a = new Array(Math.ceil(this.state.equipments_json.length / n))
+        const n2 = 12 //tweak this to add more items per line
+
+        const y2 = new Array(Math.ceil(this.state.equipments_json.length / n2))
             .fill()
-            .map(_ => this.state.equipments_json.splice(0, n))
+            .map(_ => this.state.equipments_json.splice(0, n2))
 
-        let z = [];
+        let x2 = [];
 
-        for (var i2 = 0; i < a.length; i2++) {
-            z = z.concat(a[i2]);
+        for (var i2 = 0; i2 < y2.length; i2++) {
+            x2 = x2.concat(y2[i2]);
         }
 
         this.setState({
             RAW_CARDS: x,
             PARSED_CARDS: y,
-            RAW_EQUIPMENTS: a,
-            PARSED_EQUIPMENTS: z
+            RAW_EQUIPMENTS: x2,
+            PARSED_EQUIPMENTS: y2
         })
     }
 
@@ -76,7 +81,14 @@ class Chinq extends React.Component {
         this.setState({ searched: searchedValue });
 
         if (searchedValue.length >= 3) {
-            let result = this.state.RAW_CARDS.filter(function (item) {
+
+            let context = this.state.RAW_CARDS;
+
+            if (this.state.context !== 0) {
+                context = this.state.RAW_EQUIPMENTS;
+            }
+
+            let result = context.filter(function (item) {
                 if (item.name.toLowerCase().includes(searchedValue.toLowerCase())) {
                     return item
                 } else {
@@ -104,8 +116,10 @@ class Chinq extends React.Component {
     triggerChange() {
         const searched = this.state.searched;
 
-        if (this.state.searched !== searched)
+        if (this.state.searched !== searched) {
             this.handleChange(this)
+        }
+
     }
 
     selectCard(e) {
@@ -115,18 +129,35 @@ class Chinq extends React.Component {
 
         let array = this.state.recipe;
 
-        if (e.currentTarget.getAttribute("data-id")) {
-            document.getElementById(active_card).setAttribute("data-id", "");
-            array[active_card] = null;
-        }
+        
 
-        for (let index = 0; index < document.getElementsByClassName("card-chinq").length; index++) {
+        if (this.state.context === 0) {
 
-            if (document.getElementsByClassName("card-chinq")[index].dataset.image === e.currentTarget.getAttribute("data-image")) {
+            if (e.currentTarget.getAttribute("data-id")) {
+                document.getElementById(active_card).setAttribute("data-id", "");
+                array[active_card] = null;
+            }
+
+            for (let index = 0; index < document.getElementsByClassName("card-chinq").length; index++) {
+
+                if (document.getElementsByClassName("card-chinq")[index].dataset.image === e.currentTarget.getAttribute("data-image")) {
+                    e.currentTarget.src = require("../images/empty_card_selected.png")["default"];
+                } else {
+                    if (!this.state.recipe[index])
+                        document.getElementsByClassName("card-chinq")[index].src = require("../images/empty_card.png")["default"];
+                }
+            }
+        } else {
+
+            if (e.currentTarget.getAttribute("data-id")) {
+                document.getElementById(5).setAttribute("data-id", "");
+            }
+
+            if (document.getElementById(5).dataset.image === e.currentTarget.getAttribute("data-image")) {
                 e.currentTarget.src = require("../images/empty_card_selected.png")["default"];
             } else {
-                if (!this.state.recipe[index])
-                    document.getElementsByClassName("card-chinq")[index].src = require("../images/empty_card.png")["default"];
+                if (!this.state.recipe_equipment_related)
+                    document.getElementById(5).src = require("../images/empty_card.png")["default"];
             }
         }
 
@@ -138,16 +169,29 @@ class Chinq extends React.Component {
     modifyRecipe(e) {
         e.preventDefault();
 
-        let array = this.state.recipe;
+        if (this.state.context === 0) {
+            let array = this.state.recipe;
 
-        if (e.currentTarget.getAttribute("data-id")) {
-            array[this.state.active_card] = e.currentTarget.getAttribute("data-id");
-            document.getElementById(this.state.active_card).setAttribute("data-id", e.currentTarget.getAttribute("data-id"));
+            if (e.currentTarget.getAttribute("data-id")) {
+                array[this.state.active_card] = e.currentTarget.getAttribute("data-id");
+                document.getElementById(this.state.active_card).setAttribute("data-id", e.currentTarget.getAttribute("data-id"));
+            }
+
+            this.setState({
+                recipe: array
+            })
+        } else {
+            if (e.currentTarget.getAttribute("data-id")) {
+                document.getElementById(this.state.active_card).setAttribute("data-id", e.currentTarget.getAttribute("data-id"));
+
+                this.setState({
+                    recipe_equipment_related: e.currentTarget.getAttribute("data-id")
+                })
+            }
         }
 
-        this.setState({
-            recipe: array
-        })
+        document.getElementById("searchbar").value = "";
+        this.handleChange();
     }
 
     resetCards() {
@@ -166,7 +210,7 @@ class Chinq extends React.Component {
 
         if (!this.checkForDuplicates(this.state.recipe)) {
             let recipe = {
-                name: "",
+                recipe_equipment_related: this.state.recipe_equipment_related,
                 recipe: this.state.recipe
             }
 
@@ -184,8 +228,18 @@ class Chinq extends React.Component {
             };
             request.send(recipeJSON);
         } else {
-            alert("CARTES EN DOUBLON")
+            this.setState({
+                context: 0,
+                active_card: -1
+            })
         }
+    }
+
+    assignRecipe() {
+        this.setState({
+            context: 1,
+            active_card: -1
+        })
     }
 
     checkForDuplicates(array) {
@@ -196,8 +250,18 @@ class Chinq extends React.Component {
 
         const paginations = [];
 
-        for (let index = 0; index < this.state.PARSED_CARDS.length; index++) {
-            if ((index === 0 || index === this.state.PARSED_CARDS.length - 1) || (index >= this.state.paginationIndex - 2 && index <= this.state.paginationIndex + 2)) {
+        let context = this.state.PARSED_CARDS;
+        let pathToImages = "cards";
+        let typeImages = ".svg";
+
+        if (this.state.context !== 0) {
+            context = this.state.PARSED_EQUIPMENTS;
+            pathToImages = "items";
+            typeImages = ".png";
+        }
+
+        for (let index = 0; index < context.length; index++) {
+            if ((index === 0 || index === context.length - 1) || (index >= this.state.paginationIndex - 2 && index <= this.state.paginationIndex + 2)) {
 
                 if (index === this.state.paginationIndex) {
                     paginations.push(<div onClick={this.changePage.bind(this)} className="selected-pagination" pagination-index={index}>{index + 1}</div>)
@@ -207,28 +271,51 @@ class Chinq extends React.Component {
             }
         }
 
-        let img0 = this.state.recipe[0] ? require("../images/cards/" + this.state.recipe[0] + ".svg")["default"] : require("../images/empty_card.png")["default"];
-        let img1 = this.state.recipe[1] ? require("../images/cards/" + this.state.recipe[1] + ".svg")["default"] : require("../images/empty_card.png")["default"];
-        let img2 = this.state.recipe[2] ? require("../images/cards/" + this.state.recipe[2] + ".svg")["default"] : require("../images/empty_card.png")["default"];
-        let img3 = this.state.recipe[3] ? require("../images/cards/" + this.state.recipe[3] + ".svg")["default"] : require("../images/empty_card.png")["default"];
-        let img4 = this.state.recipe[4] ? require("../images/cards/" + this.state.recipe[4] + ".svg")["default"] : require("../images/empty_card.png")["default"];
+        let img0 = require("../images/empty_card.png")["default"];
+        let img1 = require("../images/empty_card.png")["default"];
+        let img2 = require("../images/empty_card.png")["default"];
+        let img3 = require("../images/empty_card.png")["default"];
+        let img4 = require("../images/empty_card.png")["default"];
+        let img5 = require("../images/empty_card.png")["default"];
+
+        if (this.state.context === 0) {
+            img0 = this.state.recipe[0] ? require("../images/" + pathToImages + "/" + this.state.recipe[0] + typeImages)["default"] : require("../images/empty_card.png")["default"];
+            img1 = this.state.recipe[1] ? require("../images/" + pathToImages + "/" + this.state.recipe[1] + typeImages)["default"] : require("../images/empty_card.png")["default"];
+            img2 = this.state.recipe[2] ? require("../images/" + pathToImages + "/" + this.state.recipe[2] + typeImages)["default"] : require("../images/empty_card.png")["default"];
+            img3 = this.state.recipe[3] ? require("../images/" + pathToImages + "/" + this.state.recipe[3] + typeImages)["default"] : require("../images/empty_card.png")["default"];
+            img4 = this.state.recipe[4] ? require("../images/" + pathToImages + "/" + this.state.recipe[4] + typeImages)["default"] : require("../images/empty_card.png")["default"];
+        } else {
+            img5 = this.state.recipe_equipment_related ? require("../images/" + pathToImages + "/" + this.state.recipe_equipment_related + typeImages)["default"] : require("../images/empty_card.png")["default"];
+        }
 
         return (
             <div className="cards-content">
-                <div className="cards-chinq">
-                    <img id="0" className="card-chinq" src={img0} alt="" onClick={this.selectCard.bind(this)} data-image="0" data-id="" />
-                    <img id="1" className="card-chinq" src={img1} alt="" onClick={this.selectCard.bind(this)} data-image="1" data-id="" />
-                    <img id="2" className="card-chinq" src={img2} alt="" onClick={this.selectCard.bind(this)} data-image="2" data-id="" />
-                    <img id="3" className="card-chinq" src={img3} alt="" onClick={this.selectCard.bind(this)} data-image="3" data-id="" />
-                    <img id="4" className="card-chinq" src={img4} alt="" onClick={this.selectCard.bind(this)} data-image="4" data-id="" />
-                </div>
+                {this.state.context === 0 &&
+                    <div className="cards-chinq">
+                        <img id="0" className="card-chinq" src={img0} alt="" onClick={this.selectCard.bind(this)} data-image="0" data-id="" />
+                        <img id="1" className="card-chinq" src={img1} alt="" onClick={this.selectCard.bind(this)} data-image="1" data-id="" />
+                        <img id="2" className="card-chinq" src={img2} alt="" onClick={this.selectCard.bind(this)} data-image="2" data-id="" />
+                        <img id="3" className="card-chinq" src={img3} alt="" onClick={this.selectCard.bind(this)} data-image="3" data-id="" />
+                        <img id="4" className="card-chinq" src={img4} alt="" onClick={this.selectCard.bind(this)} data-image="4" data-id="" />
+                    </div>
+                }
+                {this.state.context === 1 &&
+                    <div className="cards-chinq">
+                        <img id="5" className="card-chinq" src={img5} alt="" onClick={this.selectCard.bind(this)} data-image="5" data-id="" />
+                    </div>
+                }
                 <div className="cards-tools">
-                    {this.state.recipe[0] && this.state.recipe[1] && this.state.recipe[2] && this.state.recipe[3] && this.state.recipe[4] &&
+                    {this.state.recipe[0] && this.state.recipe[1] && this.state.recipe[2] && this.state.recipe[3] && this.state.recipe[4] && this.state.context === 0 &&
                         <div className="btn-recipe recipe-clear" onClick={this.resetCards.bind()}>
                             Réinitialiser les cartes
                         </div>
                     }
-                    {this.state.PARSED_CARDS.length > 0 && this.state.searchedResults.length <= 0 && this.state.active_card >= 0 &&
+                    {this.state.recipe[0] && this.state.recipe[1] && this.state.recipe[2] && this.state.recipe[3] && this.state.recipe[4] && this.state.context === 1 &&
+                        <div className="btn-recipe recipe-clear" onClick={() => { this.setState({ context: 0, active_card: -1 }) }}>
+                            Retourner à la recette
+                        </div>
+                    }
+                    {this.state.PARSED_CARDS.length > 0 && this.state.searchedResults.length >= 0 && this.state.active_card >= 0 &&
                         <div className="cards-search">
                             <input
                                 id="searchbar"
@@ -240,19 +327,24 @@ class Chinq extends React.Component {
                             />
                         </div>
                     }
-                    {this.state.recipe[0] && this.state.recipe[1] && this.state.recipe[2] && this.state.recipe[3] && this.state.recipe[4] &&
+                    {this.state.recipe[0] && this.state.recipe[1] && this.state.recipe[2] && this.state.recipe[3] && this.state.recipe[4] && this.state.context === 0 &&
+                        <div className="btn-recipe recipe-validate" onClick={this.assignRecipe.bind(this)}>
+                            Associer la recette à un truc
+                        </div>
+                    }
+                    {this.state.recipe_equipment_related && this.state.context === 1 &&
                         <div className="btn-recipe recipe-validate" onClick={this.createRecipe.bind(this)}>
-                            Créer une nouvelle recette
+                            Créer une recette
                         </div>
                     }
                 </div>
                 <div className="cards-list">
-                    {this.state.PARSED_CARDS.length > 0 && this.state.searchedResults.length <= 0 && this.state.active_card >= 0 &&
+                    {context.length > 0 && this.state.searchedResults.length <= 0 && this.state.active_card >= 0 &&
 
-                        this.state.PARSED_CARDS[this.state.paginationIndex].map((cards) => {
+                        context[this.state.paginationIndex].map((cards) => {
                             return (
                                 <div className="card-details" key={cards.id} onClick={this.modifyRecipe.bind(this)} data-id={cards.id}>
-                                    <div className="card-image"><img src={require("../images/cards/" + cards.id + ".svg")["default"]} alt={cards.name} /></div>
+                                    <div className="card-image"><img src={require("../images/" + pathToImages + "/" + cards.id + typeImages)["default"]} alt={cards.name} /></div>
                                     <div className="card-content">
                                         <div className="card-name">{cards.name}</div>
                                         <div className="card-level">Level {cards.level}</div>
@@ -261,12 +353,12 @@ class Chinq extends React.Component {
                             )
                         })
                     }
-                    {this.state.searchedResults.length > 0 && this.state.active_card >= 0 &&
+                    {this.state.searchedResults.length > 0 && this.state.active_card >= 0 && this.state.active_card >= 0 &&
 
                         this.state.searchedResults.map((cards) => {
                             return (
                                 <div className="card-details" key={cards.id} onClick={this.modifyRecipe.bind(this)} data-id={cards.id}>
-                                    <div className="card-image"><img src={require("../images/cards/" + cards.id + ".svg")["default"]} alt={cards.name} /></div>
+                                    <div className="card-image"><img src={require("../images/" + pathToImages + "/" + cards.id + typeImages)["default"]} alt={cards.name} /></div>
                                     <div className="card-content">
                                         <div className="card-name">{cards.name}</div>
                                         <div className="card-level">Level {cards.level}</div>
@@ -276,7 +368,7 @@ class Chinq extends React.Component {
                         })
                     }
                 </div>
-                {this.state.PARSED_CARDS.length > 0 && this.state.searchedResults.length <= 0 && this.state.active_card >= 0 &&
+                {context.length > 0 && this.state.searchedResults.length <= 0 && this.state.active_card >= 0 &&
 
                     <div className="paginations">
                         {paginations}
