@@ -78,6 +78,17 @@
   color: #573e9a;
 }
 
+.content .cards-content .btn-return {
+  flex-basis: 20%;
+  padding: 15px 10px;
+  background: #143b5c;
+  color: #b9cbdc;
+  border: 1px solid #648cb1;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .content .cards-content .cards-tools .recipe-validate {
   background: #031934;
 }
@@ -108,6 +119,17 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+}
+
+.cards-content .cards-list-recipes {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cards-content .hide {
+  display: none;
 }
 
 .cards-content .card-details {
@@ -151,6 +173,11 @@
 
 .cards-content .card-details .card-level {
   color: #648cb1;
+  font-weight: bold;
+}
+
+.cards-content .card-details .card-recipes {
+  color: #573e9a;
   font-weight: bold;
 }
 

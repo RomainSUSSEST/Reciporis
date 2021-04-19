@@ -21,7 +21,7 @@ class Cards extends React.Component {
     }
 
     componentDidMount() {
-        const n = 24 //tweak this to add more items per line
+        const n = 20 //tweak this to add more items per line
 
         const y = new Array(Math.ceil(this.state.cards_json.length / n))
             .fill()

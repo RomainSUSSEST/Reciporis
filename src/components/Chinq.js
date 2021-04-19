@@ -225,8 +225,10 @@ class Chinq extends React.Component {
             request.open("PUT", "https://json.extendsclass.com/bin/9565f0b7634e", true);
             request.setRequestHeader('Security-key', 'RECIPORIS')
             request.onreadystatechange = () => {
+                window.location.reload();
             };
             request.send(recipeJSON);
+            
         } else {
             this.setState({
                 context: 0,

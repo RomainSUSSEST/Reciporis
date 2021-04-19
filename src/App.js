@@ -50,10 +50,10 @@ class App extends React.Component {
     if (this.state.showComponent !== false) {
       switch (this.state.showComponent) {
         case "Cards":
-          renderingComponent = <Cards cards_json={cards} />
+          renderingComponent = <Cards cards_json={cards} equipments_json={things} recipes_json={this.state.recipesDB}/>
           break;
         case "Equipments":
-          renderingComponent = <Equipments cards_json={things} />
+          renderingComponent = <Equipments cards_json={cards} equipments_json={things} recipes_json={this.state.recipesDB}/>
           break;
         case "Chinq":
           renderingComponent = <Chinq cards_json={cards} equipments_json={things} recipes_json={this.state.recipesDB}/>
